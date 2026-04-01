@@ -1,6 +1,6 @@
 
 
-import './App.css'
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 
@@ -286,15 +286,48 @@ function drawWaveField(ctx, params, time) {
   const width = ctx.canvas.width;
   const height = ctx.canvas.height;
   
+  
+
   for (let x = 0; x < width; x += 3) {
     for (let y = 0; y < height; y += 3) {
+      ctx.globalCompositeOperation = "lighter";
       const amplitude = calculateWaveAmplitude(x, y, time, params);
-      const brightness = Math.abs(amplitude) * 100;
-      const color = amplitude > 0 
+     // const brightness = Math.abs(amplitude) * 100;
+
+      /* const color = amplitude > 0 
         ? `rgb(${brightness}, ${brightness}, 255)` 
         : `rgb(255, ${brightness}, ${brightness})`;
-      ctx.fillStyle = color;
+       */
+      
+        //ctx.fillStyle = color;
+
+ const maxAmp = 2;
+const norm = Math.max(-1, Math.min(1, amplitude / maxAmp));
+//const intensity = Math.abs(norm);
+const intensity = Math.pow(Math.abs(norm), 0.6);  
+
+// 白色贡献（只在正振幅）
+const whiteMix = norm > 0 ? intensity : 0;
+
+// 蓝色深度（只在负振幅）
+const blueDepth = norm < 0 ? intensity : 0;
+
+const r = 255 * whiteMix;
+const g = 255 * whiteMix + 50 * (1 - whiteMix);
+const b = 180 + 75 * (1 - blueDepth);
+
+ctx.fillStyle = `rgb(${r}, ${g}, ${b})`; 
+
+
+
+////////////////////////////////////////////
+
+ctx.fillRect(x, y, 3, 3);
+
+ctx.shadowBlur = 0;
       ctx.fillRect(x, y, 3, 3);
+
+      ctx.globalCompositeOperation = "source-over";
     }
   }
 }
